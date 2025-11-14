@@ -2,7 +2,7 @@ package com.bookstoreswing.ui.controllers;
 
 import com.bookstoreswing.service.BookService;
 import com.bookstoreswing.service.CartService;
-import com.bookstoreswing.ui.components.HomeWindow;
+import com.bookstoreswing.ui.windows.HomeWindow; // CORRECTION: windows au lieu de components
 
 /**
  * Controller for home view

@@ -3,13 +3,15 @@ package com.bookstoreswing.ui.windows;
 import javax.swing.*;
 import java.awt.*;
 import com.bookstoreswing.ui.components.HeaderPanel;
+import com.bookstoreswing.ui.panels.BooksPanel;
+import com.bookstoreswing.service.CartService;
 
 public class BookWindow extends JFrame {
 
     public BookWindow() {
-        setTitle("Antiquarian - Books");
+        setTitle("Antiquarian - Books Collection");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1100, 800);
+        setSize(1200, 800);
         setLocationRelativeTo(null);
 
         // Load background image
@@ -24,13 +26,21 @@ public class BookWindow extends JFrame {
 
         final Image bgFinal = backgroundImage;
 
-        // Background panel
+        // Background panel with dark overlay for better readability
         JPanel backgroundPanel = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                if (bgFinal != null)
+                if (bgFinal != null) {
                     g.drawImage(bgFinal, 0, 0, getWidth(), getHeight(), this);
+                    // Add dark overlay for better text readability
+                    g.setColor(new Color(20, 10, 10, 180));
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                } else {
+                    // Fallback background
+                    g.setColor(new Color(45, 35, 35));
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                }
             }
         };
         setContentPane(backgroundPanel);
@@ -39,11 +49,12 @@ public class BookWindow extends JFrame {
         HeaderPanel header = new HeaderPanel("Antiquarian");
         backgroundPanel.add(header, BorderLayout.NORTH);
 
-        // Center content
-        JLabel label = new JLabel("📚 Explore Our Collection", SwingConstants.CENTER);
-        label.setFont(new Font("Georgia", Font.BOLD, 30));
-        label.setForeground(new Color(255, 245, 230));
-        backgroundPanel.add(label, BorderLayout.CENTER);
+        // Create CartService and BooksPanel
+        CartService cartService = new CartService();
+        BooksPanel booksPanel = new BooksPanel(cartService);
+        
+        // Add BooksPanel to center
+        backgroundPanel.add(booksPanel, BorderLayout.CENTER);
     }
 
     public static void main(String[] args) {

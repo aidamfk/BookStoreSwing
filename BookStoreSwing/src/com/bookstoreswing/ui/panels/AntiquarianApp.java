@@ -4,12 +4,14 @@ import java.awt.*;
 import java.io.File;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import com.bookstoreswing.service.CartService; // AJOUT
 
 public class AntiquarianApp extends JFrame {
 
     private CardLayout cardLayout;
     private JPanel contentCards;
     private BufferedImage backgroundImage;
+    private CartService cartService; // AJOUT
 
     public AntiquarianApp() {
         setTitle("Antiquarian - Bookstore");
@@ -17,6 +19,9 @@ public class AntiquarianApp extends JFrame {
         setSize(1100, 750);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+
+        // AJOUT: Initialiser le service panier
+        cartService = new CartService();
 
         // Load background image (try resource then file)
         backgroundImage = loadBackgroundImage("/assets/bg.jpg", "src/assets/bg.jpg");
@@ -26,9 +31,9 @@ public class AntiquarianApp extends JFrame {
         contentCards = new JPanel(cardLayout);
         contentCards.setOpaque(false); // we'll paint BG in layered panel
 
-        // Create pages
+        // Create pages - CORRECTION: passer cartService à BooksPanel
         HomePanel home = new HomePanel(() -> showCard("BOOKS"));
-        BooksPanel books = new BooksPanel();
+        BooksPanel books = new BooksPanel(cartService); // CORRECTION
         FavoritePanel fav = new FavoritePanel();
         CartPanel cart = new CartPanel();
 
