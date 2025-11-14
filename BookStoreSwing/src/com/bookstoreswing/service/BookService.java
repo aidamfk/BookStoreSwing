@@ -23,6 +23,8 @@ public class BookService {
     public List<String> getCategories() {
         List<String> categories = new ArrayList<>();
         categories.add("All books");
+        categories.add("Romance");
+        categories.add("Historical");
         categories.add("Fantasy");
         categories.add("Guerre");
         return categories;

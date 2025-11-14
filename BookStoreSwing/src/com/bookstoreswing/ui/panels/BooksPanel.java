@@ -70,29 +70,29 @@ public class BooksPanel extends JPanel {
         titlePanel.add(subtitleLabel, BorderLayout.SOUTH);
         titlePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
 
-        // Filtres - VERSION AMÉLIORÉE
-        JPanel filterPanel = new JPanel(new BorderLayout(20, 0)); // Espacement de 20px
+        // Filtres - VERSION FINALE
+        JPanel filterPanel = new JPanel(new BorderLayout(20, 0));
         filterPanel.setOpaque(false);
 
-        // Barre de recherche large (prend tout l'espace disponible)
+        // Barre de recherche large
         JPanel searchPanel = new JPanel(new BorderLayout());
         searchPanel.setOpaque(false);
         
         JTextField searchField = new JTextField();
         searchField.setText("Search by title or authors...");
-        searchField.setForeground(new Color(100, 80, 70));
-        searchField.setBackground(new Color(220, 200, 180)); // Marron clair
-        searchField.setCaretColor(new Color(100, 80, 70));
+        searchField.setForeground(new Color(80, 60, 50)); // Texte plus foncé pour meilleure visibilité
+        searchField.setBackground(new Color(220, 200, 180));
+        searchField.setCaretColor(new Color(80, 60, 50));
         searchField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 180, 160), 2), // Bordure beige
+            BorderFactory.createLineBorder(new Color(200, 180, 160), 2),
             BorderFactory.createEmptyBorder(8, 15, 8, 15)
         ));
         searchField.setFont(new Font("SansSerif", Font.PLAIN, 14));
         
-        // Bouton de recherche avec icône
+        // Bouton de recherche
         JButton searchButton = new JButton("🔍");
         searchButton.setPreferredSize(new Dimension(50, 35));
-        searchButton.setBackground(new Color(180, 150, 130)); // Marron moyen
+        searchButton.setBackground(new Color(180, 150, 130));
         searchButton.setForeground(Color.WHITE);
         searchButton.setBorder(BorderFactory.createLineBorder(new Color(200, 180, 160), 1));
         searchButton.setFocusPainted(false);
@@ -101,33 +101,46 @@ public class BooksPanel extends JPanel {
         searchPanel.add(searchField, BorderLayout.CENTER);
         searchPanel.add(searchButton, BorderLayout.EAST);
         
-        // Catégories avec icône
+        // Catégories avec meilleure visibilité
         JPanel categoryPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         categoryPanel.setOpaque(false);
         
-        // ComboBox des catégories avec style marron
+        // ComboBox des catégories avec texte plus visible
         categoryComboBox = new JComboBox<>();
-        for (String category : bookService.getCategories()) {
+        
+        // AJOUT: Toutes les catégories comme sur ta photo
+        String[] allCategories = {"All books", "Romance", "Historical", "Fantasy", "Guerre"};
+        for (String category : allCategories) {
             categoryComboBox.addItem(category);
         }
         
-        // Style de la ComboBox
-        categoryComboBox.setBackground(new Color(220, 200, 180)); // Marron clair
-        categoryComboBox.setForeground(new Color(100, 80, 70));
+        // Style amélioré pour meilleure visibilité
+        categoryComboBox.setBackground(new Color(220, 200, 180));
+        categoryComboBox.setForeground(new Color(80, 60, 50)); // Texte plus foncé
         categoryComboBox.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 180, 160), 2), // Bordure beige
+            BorderFactory.createLineBorder(new Color(200, 180, 160), 2),
             BorderFactory.createEmptyBorder(8, 15, 8, 15)
         ));
         categoryComboBox.setFont(new Font("SansSerif", Font.PLAIN, 14));
         categoryComboBox.setPreferredSize(new Dimension(180, 35));
         
-        // Ajouter l'icône 📚 devant le texte
+        // Renderer avec meilleure visibilité
         categoryComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                label.setText("📚 " + value.toString()); // Icône + texte
-                label.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
+                
+                // Icônes différentes selon la catégorie
+                String icon = "📚"; // Icône par défaut
+                if ("Romance".equals(value)) icon = "❤️";
+                else if ("Historical".equals(value)) icon = "🏛️";
+                else if ("Fantasy".equals(value)) icon = "🧙";
+                else if ("Guerre".equals(value)) icon = "⚔️";
+                
+                label.setText(icon + " " + value.toString());
+                label.setForeground(new Color(80, 60, 50)); // Texte foncé pour bonne visibilité
+                label.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
+                label.setFont(new Font("SansSerif", Font.PLAIN, 13));
                 return label;
             }
         });
@@ -142,8 +155,8 @@ public class BooksPanel extends JPanel {
 
         categoryPanel.add(categoryComboBox);
         
-        // Disposition: recherche prend tout l'espace, catégories à droite
-        filterPanel.add(searchPanel, BorderLayout.CENTER); // CENTER pour prendre tout l'espace
+        // Disposition
+        filterPanel.add(searchPanel, BorderLayout.CENTER);
         filterPanel.add(categoryPanel, BorderLayout.EAST);
 
         headerPanel.add(titlePanel, BorderLayout.NORTH);
@@ -157,7 +170,7 @@ public class BooksPanel extends JPanel {
         booksGridPanel.removeAll();
         
         // Changer le layout pour GridLayout pour afficher plusieurs livres
-        booksGridPanel.setLayout(new GridLayout(0, 3, 20, 20)); // 3 colonnes, espacement 20px
+        booksGridPanel.setLayout(new GridLayout(0, 3, 20, 20));
         
         // Récupérer les livres selon la catégorie
         List<Book> booksToShow;
