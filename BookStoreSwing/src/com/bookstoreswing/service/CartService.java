@@ -32,4 +32,21 @@ public class CartService {
     }
 
     public void clear(){ items.clear(); }
+
+public void increaseQuantity(int index){
+    if(index >= 0 && index < items.size()){
+        CartItem it = items.get(index);
+        it.setQuantity(it.getQuantity() + 1);
+    }
 }
+
+public void decreaseQuantity(int index){
+    if(index >= 0 && index < items.size()){
+        CartItem it = items.get(index);
+        if(it.getQuantity() > 1){
+            it.setQuantity(it.getQuantity() - 1);
+        }
+    }
+}
+}
+
