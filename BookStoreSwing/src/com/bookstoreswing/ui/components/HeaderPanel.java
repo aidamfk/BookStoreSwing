@@ -13,7 +13,7 @@ public class HeaderPanel extends JPanel {
 
     public HeaderPanel(String title) {
         setLayout(new BorderLayout());
-        setBackground(new Color(70, 50, 50)); // dark maroon/brown
+        setBackground(new Color(70, 50, 50));
         setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
         setPreferredSize(new Dimension(getWidth(), 70));
 
@@ -37,7 +37,7 @@ public class HeaderPanel extends JPanel {
         JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         logoPanel.setOpaque(false);
 
-        // Icon (using text icon for now)
+        // Icon
         JLabel iconLabel = new JLabel("📚");
         iconLabel.setFont(new Font("Serif", Font.PLAIN, 24));
         iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 8));
@@ -57,7 +57,7 @@ public class HeaderPanel extends JPanel {
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         searchPanel.setOpaque(false);
 
-        // Search field with rounded appearance
+        // Search field
         JTextField searchField = new JTextField(25);
         searchField.setPreferredSize(new Dimension(400, 38));
         searchField.setText("Search for book, author, theme");

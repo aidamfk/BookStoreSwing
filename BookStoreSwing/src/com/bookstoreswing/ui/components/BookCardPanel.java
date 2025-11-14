@@ -21,7 +21,7 @@ public class BookCardPanel extends JPanel {
                 BorderFactory.createEmptyBorder(8, 8, 8, 8)
         ));
 
-        // COVER area with REAL image
+        // COVER area
         JPanel coverPanel = new JPanel();
         coverPanel.setOpaque(false);
         coverPanel.setPreferredSize(new Dimension(160, 200));
@@ -32,19 +32,15 @@ public class BookCardPanel extends JPanel {
         JLabel imageLabel;
 
         if (bookImage != null) {
-            // Scale image to fit
             Image scaledImage = bookImage.getImage().getScaledInstance(160, 200, Image.SCALE_SMOOTH);
             imageLabel = new JLabel(new ImageIcon(scaledImage));
         } else {
-            // Fallback: placeholder with book initials
             imageLabel = new JLabel() {
                 @Override
                 protected void paintComponent(Graphics g) {
                     super.paintComponent(g);
-                    // background of cover
                     g.setColor(new Color(90, 60, 60));
                     g.fillRect(0, 0, getWidth(), getHeight());
-                    // optional faux artwork: draw title initials
                     g.setColor(new Color(235, 220, 200));
                     g.setFont(new Font("Serif", Font.BOLD, 18));
                     String t = book.getTitle() == null ? "Book" : book.getTitle();
@@ -60,16 +56,15 @@ public class BookCardPanel extends JPanel {
         imageLabel.setBounds(0, 0, 160, 200);
         coverPanel.add(imageLabel);
 
-        // heart/favorite button (top-right)
-        JButton heart = new JButton("\u2661");
-        heart.setToolTipText("Add to favourites");
+        // heart button
+        JButton heart = new JButton("♡");
         heart.setBorderPainted(false);
         heart.setContentAreaFilled(false);
         heart.setForeground(new Color(220, 200, 180));
         heart.setBounds(120, 10, 30, 30);
 
         heart.addActionListener(e -> {
-            heart.setText("\u2665");
+            heart.setText("♥");
             heart.setForeground(Color.RED);
             JOptionPane.showMessageDialog(this, book.getTitle() + " added to favourites");
         });
@@ -80,13 +75,13 @@ public class BookCardPanel extends JPanel {
         // Title and author
         JPanel mid = new JPanel(new GridLayout(2, 1));
         mid.setOpaque(false);
-        
+
         String displayTitle = book.getTitle();
         if (displayTitle.length() > 30) {
             displayTitle = displayTitle.substring(0, 27) + "...";
         }
-        
-        JLabel title = new JLabel("<html><div style='text-align:center;'>" + safeString(displayTitle) + "</div></html>");
+
+        JLabel title = new JLabel("<html><div style='text-align:center;'>" + displayTitle + "</div></html>");
         title.setFont(new Font("Serif", Font.BOLD, 13));
         title.setForeground(new Color(245, 235, 220));
         title.setHorizontalAlignment(SwingConstants.CENTER);
@@ -95,8 +90,8 @@ public class BookCardPanel extends JPanel {
         if (displayAuthor.length() > 25) {
             displayAuthor = displayAuthor.substring(0, 22) + "...";
         }
-        
-        JLabel author = new JLabel(safeString(displayAuthor), SwingConstants.CENTER);
+
+        JLabel author = new JLabel(displayAuthor, SwingConstants.CENTER);
         author.setFont(new Font("SansSerif", Font.PLAIN, 12));
         author.setForeground(new Color(210, 190, 170));
 
@@ -105,32 +100,29 @@ public class BookCardPanel extends JPanel {
         mid.setBorder(BorderFactory.createEmptyBorder(8, 4, 8, 4));
         add(mid, BorderLayout.CENTER);
 
-        // bottom: price + add-to-cart
+        // Price and add button
         JPanel bottom = new JPanel(new BorderLayout());
         bottom.setOpaque(false);
-        
-        String formattedPrice = formatPrice(book.getPrice() / 100.0);
-        
-        JLabel price = new JLabel(formattedPrice + " €");
+
+        String formattedPrice = String.format("%.2f", book.getPrice() / 100.0).replace(".", ",") + " €";
+        JLabel price = new JLabel(formattedPrice);
         price.setFont(new Font("Serif", Font.BOLD, 13));
         price.setForeground(new Color(235, 215, 190));
         price.setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
 
-        JButton add = new JButton("Add");
-        add.setBackground(new Color(120, 78, 76));
-        add.setForeground(Color.WHITE);
-        add.setFocusPainted(false);
-        add.addActionListener(e -> {
+        JButton addBtn = new JButton("Add");
+        addBtn.setBackground(new Color(120, 78, 76));
+        addBtn.setForeground(Color.WHITE);
+        addBtn.setFocusPainted(false);
+        addBtn.addActionListener(e -> {
             if (cartService != null) {
                 cartService.addBook(book);
                 JOptionPane.showMessageDialog(this, book.getTitle() + " added to cart");
-            } else {
-                JOptionPane.showMessageDialog(this, "Cart service unavailable");
             }
         });
 
         bottom.add(price, BorderLayout.WEST);
-        bottom.add(add, BorderLayout.EAST);
+        bottom.add(addBtn, BorderLayout.EAST);
         bottom.setBorder(BorderFactory.createEmptyBorder(6, 4, 4, 4));
         add(bottom, BorderLayout.SOUTH);
     }
@@ -139,46 +131,30 @@ public class BookCardPanel extends JPanel {
         if (book.getImagePath() == null || book.getImagePath().isEmpty()) {
             return null;
         }
-        
+
         try {
             String[] possiblePaths = {
-                "/" + book.getImagePath(),
-                "/src/" + book.getImagePath(),
-                "/assets/" + book.getImagePath(),
                 book.getImagePath(),
                 "src/" + book.getImagePath(),
                 "assets/" + book.getImagePath()
             };
-            
+
             for (String path : possiblePaths) {
-                java.net.URL imageUrl = getClass().getResource(path);
+                java.net.URL imageUrl = getClass().getResource("/" + path);
                 if (imageUrl != null) {
-                    System.out.println("Image trouvée: " + path);
                     return new ImageIcon(imageUrl);
                 }
-                
+
                 File imageFile = new File(path);
                 if (imageFile.exists()) {
-                    System.out.println("Image trouvée (fichier): " + path);
                     return new ImageIcon(imageFile.getAbsolutePath());
                 }
             }
-            
-            System.out.println("Image non trouvée pour: " + book.getImagePath());
-            
+
         } catch (Exception e) {
-            System.err.println("Error loading image for book: " + book.getTitle());
-            e.printStackTrace();
+            System.err.println("Error loading image: " + book.getTitle());
         }
-        
+
         return null;
-    }
-
-    private String safeString(String s) {
-        return s == null ? "" : s;
-    }
-
-    private String formatPrice(double price) {
-        return String.format("%.2f", price).replace(".", ",");
     }
 }

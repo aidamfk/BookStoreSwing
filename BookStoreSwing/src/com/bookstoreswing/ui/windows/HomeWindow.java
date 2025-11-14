@@ -1,19 +1,20 @@
 package com.bookstoreswing.ui.windows;
 
 import com.bookstoreswing.ui.components.BookCardPanel;
+import com.bookstoreswing.ui.components.FooterPanel;
 import com.bookstoreswing.ui.components.HeaderPanel;
 import com.bookstoreswing.model.Book;
 import com.bookstoreswing.service.BookService;
 import com.bookstoreswing.service.CartService;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.net.URL;
 import java.util.List;
 
-/**
- * Antiquarian Home Page — visually matching the screenshots
- */
 public class HomeWindow extends JFrame {
 
     private CartService cartService;
@@ -21,173 +22,187 @@ public class HomeWindow extends JFrame {
     public HomeWindow() {
         setTitle("Antiquarian - Home");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1100, 800);
+        setSize(1200, 860);
         setLocationRelativeTo(null);
 
-        // ✅ Load background safely
-        Image backgroundImage = loadBackgroundImage();
+        Image bg = loadBackgroundImage();
 
-        final Image bgFinal = backgroundImage;
-
-        // Root panel paints background + overlay
         JPanel root = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                if (bgFinal != null) {
-                    g.drawImage(bgFinal, 0, 0, getWidth(), getHeight(), this);
-                    g.setColor(new Color(20, 10, 10, 160)); // semi-dark overlay
-                    g.fillRect(0, 0, getWidth(), getHeight());
+                if (bg != null) {
+                    g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setColor(new Color(42, 20, 18, 160));
+                    g2.fillRect(0, 0, getWidth(), getHeight());
+                    g2.dispose();
                 } else {
-                    g.setColor(new Color(45, 35, 35)); // fallback background
+                    g.setColor(new Color(35, 30, 30));
                     g.fillRect(0, 0, getWidth(), getHeight());
                 }
             }
         };
+        root.setOpaque(false);
         setContentPane(root);
 
-        // --- Navbar (top header) ---
+        // Header / Navbar
         HeaderPanel header = new HeaderPanel("Antiquarian");
         root.add(header, BorderLayout.NORTH);
 
-        // --- Center section with scroll ---
-        JPanel centerWrapper = new JPanel(new BorderLayout());
-        centerWrapper.setOpaque(false);
+        // MAIN SCROLL AREA
+        JPanel main = new JPanel();
+        main.setOpaque(false);
+        main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
 
-        JPanel vertical = new JPanel();
-        vertical.setOpaque(false);
-        vertical.setLayout(new BoxLayout(vertical, BoxLayout.Y_AXIS));
+        main.add(Box.createVerticalStrut(20));
+        main.add(createHero());
+        main.add(Box.createVerticalStrut(40));
+        main.add(createFeatured());
+        main.add(Box.createVerticalStrut(40));
+        main.add(new FooterPanel());
+        main.add(Box.createVerticalStrut(30));
 
-        // === HERO SECTION ===
-        JPanel hero = createHeroSection();
-        vertical.add(hero);
-        vertical.add(Box.createVerticalStrut(50));
-
-        // === FEATURED SECTION (scrolls to) ===
-        JPanel featured = createFeaturedSection();
-        vertical.add(featured);
-
-        // === Scrollable setup ===
-        JScrollPane scroll = new JScrollPane(vertical);
-        scroll.setOpaque(false);
-        scroll.getViewport().setOpaque(false);
-        scroll.setBorder(null);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        centerWrapper.add(scroll, BorderLayout.CENTER);
-
-        root.add(centerWrapper, BorderLayout.CENTER);
+        JScrollPane sc = new JScrollPane(main);
+        sc.setOpaque(false);
+        sc.getViewport().setOpaque(false);
+        sc.setBorder(null);
+        sc.getVerticalScrollBar().setUnitIncrement(16);
+        sc.getVerticalScrollBar().setPreferredSize(new Dimension(10, Integer.MAX_VALUE));
+        root.add(sc, BorderLayout.CENTER);
     }
 
-    // ---- Load background image (tries multiple extensions) ----
     private Image loadBackgroundImage() {
-        String[] paths = {"/assets/bg.jpg", "/assets/bg.jpeg", "/assets/bg.png"};
-        for (String p : paths) {
+        String[] resourceCandidates = {
+            "/assets/bg.jpg", "/assets/bg.jpeg", "/assets/bg.png", "/assets/bg.jpg.jpg"
+        };
+
+        for (String r : resourceCandidates) {
             try {
-                URL u = getClass().getResource(p);
-                if (u != null) return new ImageIcon(u).getImage();
+                URL u = getClass().getResource(r);
+                if (u != null) {
+                    BufferedImage b = ImageIO.read(u);
+                    if (b != null) return b;
+                }
             } catch (Exception ignored) {}
         }
-        try {
-            return Toolkit.getDefaultToolkit().getImage("assets/bg.jpg.jpg");
-        } catch (Exception ignored) {}
+
+        String[] fileCandidates = {
+            "src/assets/bg.jpg", "src/assets/bg.jpeg",
+            "assets/bg.jpg", "assets/bg.jpeg"
+        };
+
+        for (String f : fileCandidates) {
+            try {
+                File ff = new File(f);
+                if (ff.exists()) {
+                    BufferedImage b = ImageIO.read(ff);
+                    if (b != null) return b;
+                }
+            } catch (Exception ignored) {}
+        }
+
+        System.err.println("Background not found");
         return null;
     }
 
-    // ---- HERO SECTION ----
-    private JPanel createHeroSection() {
-        JPanel hero = new JPanel(new GridBagLayout());
+    private JPanel createHero() {
+        JPanel hero = new JPanel();
         hero.setOpaque(false);
-        hero.setPreferredSize(new Dimension(0, 500));
+        hero.setLayout(new BoxLayout(hero, BoxLayout.Y_AXIS));
+        hero.setBorder(BorderFactory.createEmptyBorder(110, 80, 110, 80));
+        hero.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = new Insets(10, 0, 10, 0);
+        JLabel big = new JLabel("Where History Meets Romance");
+        big.setFont(new Font("Georgia", Font.BOLD, 64));
+        big.setForeground(new Color(250, 240, 230));
+        big.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Title
-        JLabel title = new JLabel("Where History Meets Romance");
-        title.setFont(new Font("Georgia", Font.BOLD, 46));
-        title.setForeground(new Color(245, 230, 210));
-        title.setHorizontalAlignment(SwingConstants.CENTER);
-        hero.add(title, gbc);
+        JLabel sub = new JLabel("<html><div style='text-align:center;'>Discover rare treasures and timeless tales from centuries past.<br>Each book tells a story beyond its pages.</div></html>");
+        sub.setFont(new Font("Serif", Font.PLAIN, 20));
+        sub.setForeground(new Color(235, 220, 200));
+        sub.setBorder(BorderFactory.createEmptyBorder(18, 0, 24, 0));
+        sub.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Subtitle
-        gbc.gridy++;
-        gbc.insets = new Insets(20, 0, 10, 0);
-        JLabel subtitle = new JLabel("<html><div style='text-align:center;'>Discover rare treasures and timeless tales from centuries past.<br>Each book tells a story beyond its pages.</div></html>");
-        subtitle.setFont(new Font("Serif", Font.PLAIN, 20));
-        subtitle.setForeground(new Color(235, 220, 190));
-        hero.add(subtitle, gbc);
+        JButton explore = new JButton("Explore books →");
+        explore.setFont(new Font("Serif", Font.BOLD, 18));
+        explore.setBackground(new Color(126, 80, 75));
+        explore.setForeground(new Color(242, 225, 200));
+        explore.setFocusPainted(false);
+        explore.setPreferredSize(new Dimension(220, 44));
+        explore.setMaximumSize(new Dimension(220, 44));
+        explore.setAlignmentX(Component.CENTER_ALIGNMENT);
+        explore.setBorder(BorderFactory.createEmptyBorder(8, 14, 8, 14));
 
-        // Button
-        gbc.gridy++;
-        gbc.insets = new Insets(40, 0, 0, 0);
-        JButton exploreBtn = new JButton("Explore Books →");
-        exploreBtn.setFont(new Font("Serif", Font.BOLD, 18));
-        exploreBtn.setBackground(new Color(150, 110, 90));
-        exploreBtn.setForeground(new Color(245, 230, 210));
-        exploreBtn.setFocusPainted(false);
-        exploreBtn.setPreferredSize(new Dimension(200, 48));
-
-        exploreBtn.addActionListener(e -> {
+        // FIXED LAMBDA — CORRECT BRACES ✔️
+        explore.addActionListener(e -> {
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    new BookWindow().setVisible(true);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Books window not available");
+                }
+            });
             dispose();
-            SwingUtilities.invokeLater(() -> new BookWindow().setVisible(true));
         });
 
-        hero.add(exploreBtn, gbc);
+        hero.add(big);
+        hero.add(sub);
+        hero.add(explore);
 
         return hero;
     }
 
-    // ---- FEATURED SECTION ----
-    private JPanel createFeaturedSection() {
+    private JPanel createFeatured() {
         JPanel wrapper = new JPanel();
         wrapper.setOpaque(false);
         wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
+        wrapper.setBorder(BorderFactory.createEmptyBorder(10, 40, 10, 40));
 
-        // Header
-        JPanel header = new JPanel(new BorderLayout());
-        header.setOpaque(false);
-        header.setBorder(BorderFactory.createEmptyBorder(0, 40, 15, 40));
-
-        JLabel sectionTitle = new JLabel("Featured Treasures");
-        sectionTitle.setFont(new Font("Georgia", Font.BOLD, 26));
-        sectionTitle.setForeground(new Color(235, 220, 190));
-        header.add(sectionTitle, BorderLayout.WEST);
+        // Top row
+        JPanel top = new JPanel(new BorderLayout());
+        top.setOpaque(false);
+        JLabel title = new JLabel("Featured Treasures");
+        title.setFont(new Font("Georgia", Font.BOLD, 28));
+        title.setForeground(new Color(245, 230, 210));
+        top.add(title, BorderLayout.WEST);
 
         JLabel viewAll = new JLabel("<html><u>View All →</u></html>");
-        viewAll.setForeground(new Color(230, 200, 170));
-        header.add(viewAll, BorderLayout.EAST);
+        viewAll.setForeground(new Color(225, 200, 175));
+        viewAll.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        top.add(viewAll, BorderLayout.EAST);
+        wrapper.add(top);
 
-        wrapper.add(header);
+        wrapper.add(Box.createVerticalStrut(12));
 
-        // Books Grid
-        JPanel gridWrap = new JPanel(new GridLayout(0, 4, 20, 20));
-        gridWrap.setOpaque(false);
-        gridWrap.setBorder(BorderFactory.createEmptyBorder(10, 40, 40, 40));
+        JLabel small = new JLabel("Carefully curated selections from our collection");
+        small.setFont(new Font("Serif", Font.PLAIN, 14));
+        small.setForeground(new Color(215, 190, 170));
+        small.setBorder(BorderFactory.createEmptyBorder(6, 0, 18, 0));
+        wrapper.add(small);
+
+        // Grid of 4
+        JPanel grid = new JPanel(new GridLayout(1, 4, 28, 0));
+        grid.setOpaque(false);
+        grid.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         BookService bookService = new BookService();
         cartService = new CartService();
         List<Book> books = bookService.getAllBooks();
-
-        int count = 0;
+        int added = 0;
         for (Book b : books) {
-            if (count >= 4) break;
-            gridWrap.add(new BookCardPanel(b, cartService));
-            count++;
+            if (added >= 4) break;
+            grid.add(new BookCardPanel(b, cartService));
+            added++;
         }
 
-        wrapper.add(gridWrap);
+        wrapper.add(grid);
 
-        // Footer message under featured books
-        JLabel footer = new JLabel(
-                "<html><div style='text-align:center;'>Join our community of collectors and literature enthusiasts.<br>Discover stories that have captivated hearts for centuries.</div></html>",
-                SwingConstants.CENTER);
-        footer.setFont(new Font("Serif", Font.ITALIC, 15));
-        footer.setForeground(new Color(230, 210, 180));
-        footer.setBorder(BorderFactory.createEmptyBorder(20, 0, 30, 0));
-        wrapper.add(footer);
+        JLabel footerMsg = new JLabel("<html><div style='text-align:center;'>Begin Your Journey Through Time<br>Join our community of collectors and literature enthusiasts.</div></html>", SwingConstants.CENTER);
+        footerMsg.setFont(new Font("Serif", Font.ITALIC, 15));
+        footerMsg.setForeground(new Color(230,210,190));
+        footerMsg.setBorder(BorderFactory.createEmptyBorder(26, 0, 0, 0));
+        wrapper.add(footerMsg);
 
         return wrapper;
     }

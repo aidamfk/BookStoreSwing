@@ -1,4 +1,59 @@
-/BookStoreSwing/bin/
-/bin/
+############################
+# Java / Swing / Eclipse
+############################
+
+# Ignore compiled class files
 *.class
+
+# Ignore packaged files
+*.jar
+*.war
+*.ear
+
+# Ignore logs
 *.log
+
+# Ignore temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+
+############################
+# Build / Output folders
+############################
+
+# Eclipse build folder
+/bin/
+BookStoreSwing/bin/
+
+# Maven / Gradle (if ever added)
+target/
+out/
+build/
+
+############################
+# Eclipse IDE files
+############################
+
+.classpath
+.project
+.settings/
+
+############################
+# OS system files
+############################
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+############################
+# IntelliJ (if someone opens it in IntelliJ)
+############################
+
+.idea/
+*.iml

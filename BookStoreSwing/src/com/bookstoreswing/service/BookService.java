@@ -11,13 +11,21 @@ import com.bookstoreswing.data.BookData;
 public class BookService {
     
     public List<Book> getAllBooks(){
-        // TEMPORAIRE: utilise seulement Fantasy pour tester
-        return BookData.getFantasyBooks();
+        return BookData.getAllBooksWithCategories();
     }
     
     public List<Book> getBooksByCategory(String category) {
-        // TEMPORAIRE: retourne toujours Fantasy
-        return BookData.getFantasyBooks();
+        switch (category) {
+            case "Fantasy":
+                return BookData.getFantasyBooks();
+            case "Guerre":
+                return BookData.getGuerreBooks();
+            case "Romance":
+            case "Historical":
+            case "All books":
+            default:
+                return BookData.getAllBooksWithCategories();
+        }
     }
     
     public List<String> getCategories() {

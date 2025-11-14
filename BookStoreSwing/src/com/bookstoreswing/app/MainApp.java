@@ -1,8 +1,7 @@
 package com.bookstoreswing.app;
 
 import javax.swing.SwingUtilities;
-
-import com.bookstoreswing.ui.windows.HomeWindow; // CORRECTION: windows au lieu de components
+import com.bookstoreswing.ui.windows.HomeWindow;
 
 /**
  * Main application entry point
@@ -10,7 +9,7 @@ import com.bookstoreswing.ui.windows.HomeWindow; // CORRECTION: windows au lieu 
 public class MainApp {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new HomeWindow().setVisible(true); // AJOUT: setVisible(true)
+            new HomeWindow().setVisible(true);
         });
     }
 }
