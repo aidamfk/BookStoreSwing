@@ -4,14 +4,13 @@ import com.bookstoreswing.ui.components.FooterPanel;
 import com.bookstoreswing.ui.components.HeaderPanel;
 import com.bookstoreswing.data.BookData;
 import com.bookstoreswing.model.Book;
+import com.bookstoreswing.app.MainApp;
 import com.bookstoreswing.service.CartService;
 import com.bookstoreswing.ui.components.BookCardPanel;
+import com.bookstoreswing.utils.ImageLoader;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,23 +50,19 @@ public class HomeWindow extends JFrame {
         root.add(header, BorderLayout.NORTH);
 
         // Navigation listeners
-        header.addHomeListener(e -> {}); // Already home
-
+        header.addHomeListener(e -> {});
         header.addBooksListener(e -> {
             dispose();
             new BookWindow().setVisible(true);
         });
-
         header.addFavoriteListener(e -> {
-            JOptionPane.showMessageDialog(this, "Favorite page not implemented yet.");
+            new FavoriteWindow(MainApp.FAVORITES).setVisible(true);
+            dispose();
         });
-
         header.addCartListener(e -> {
-            JOptionPane.showMessageDialog(this, "Cart page not implemented yet.");
+            new CartPage(MainApp.CART).setVisible(true);
+            dispose();
         });
-        if (bg == null) {
-            System.out.println("Background image not found — using fallback.");
-        }
 
         // Main content
         JPanel main = new JPanel();
@@ -91,25 +86,25 @@ public class HomeWindow extends JFrame {
         root.add(scroll, BorderLayout.CENTER);
     }
 
+    /**
+     * FIXED: uses the new ImageLoader
+     */
     private Image loadBackgroundImage() {
-        String[] resourceCandidates = {
-                "/assets/bg.jpg",
-                "/assets/bg.jpeg",
-                "/assets/bg.png",
-                "/assets/bg.jpg.jpg"
+        String[] paths = {
+                "background/bg.jpg",
+                "background/library.jpg"
         };
 
-        for (String r : resourceCandidates) {
-            try {
-                URL u = getClass().getResource(r);
-                if (u != null) {
-                    return ImageIO.read(u);
-                }
-            } catch (Exception ignored) {}
+        for (String p : paths) {
+            Image img = ImageLoader.loadImage(p);
+            if (img != null) return img;
         }
 
+        System.err.println("Background NOT FOUND.");
         return null;
     }
+
+
 
     private JPanel createHeroSection() {
         JPanel outerFlow = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -177,13 +172,13 @@ public class HomeWindow extends JFrame {
         JPanel grid = new JPanel(new GridLayout(1, 4, 25, 0));
         grid.setOpaque(false);
 
-        cartService = new CartService();
+        cartService = MainApp.CART;
 
         List<Book> featured = new ArrayList<>();
-        featured.add(BookData.getFantasyBooks().get(0));
-        featured.add(BookData.getFantasyBooks().get(1));
-        featured.add(BookData.getFantasyBooks().get(2));
-        featured.add(BookData.getFantasyBooks().get(3));
+        List<Book> all = BookData.getFantasyBooks();
+        for (int i = 0; i < Math.min(4, all.size()); i++) {
+            featured.add(all.get(i));
+        }
 
         for (Book b : featured) {
             grid.add(new BookCardPanel(b, cartService));

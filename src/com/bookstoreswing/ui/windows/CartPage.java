@@ -3,11 +3,13 @@ package com.bookstoreswing.ui.windows;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.util.List;
+
 import com.bookstoreswing.service.CartService;
 import com.bookstoreswing.model.CartItem;
-import com.bookstoreswing.model.Book;
-import java.util.List;
 import com.bookstoreswing.ui.components.HeaderPanel;
+import com.bookstoreswing.app.MainApp;
+import com.bookstoreswing.utils.ImageLoader;
 
 public class CartPage extends JFrame {
 
@@ -17,11 +19,11 @@ public class CartPage extends JFrame {
     private Image bgImage;
     private JLabel subtitleLabel;
 
-
     public CartPage(CartService cartService) {
+
         this.cartService = cartService;
 
-        bgImage = loadImage("/assets/bg.jpg.jpg");
+        bgImage = ImageLoader.loadImage("background/bg.jpg");
 
         setTitle("Your Cart");
         setSize(1100, 720);
@@ -34,6 +36,10 @@ public class CartPage extends JFrame {
                 super.paintComponent(g);
                 if (bgImage != null)
                     g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), null);
+                else {
+                    g.setColor(new Color(35, 30, 30));
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                }
             }
         };
         setContentPane(root);
@@ -41,23 +47,10 @@ public class CartPage extends JFrame {
         HeaderPanel header = new HeaderPanel("Antiquarian");
         root.add(header, BorderLayout.NORTH);
         header.setActivePage("Cart");
-     // Navigation buttons actions
-        header.addHomeListener(e -> {
-            new HomeWindow().setVisible(true);
-            dispose();
-        });
-        
 
-        header.addBooksListener(e -> {
-            new BookWindow().setVisible(true);
-            dispose();
-        });
-
-        header.addCartListener(e -> {
-            new CartPage(cartService).setVisible(true);
-            dispose();
-        });
-
+        header.addHomeListener(e -> { new HomeWindow().setVisible(true); dispose(); });
+        header.addBooksListener(e -> { new BookWindow().setVisible(true); dispose(); });
+        header.addCartListener(e -> {});
 
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setOpaque(false);
@@ -66,15 +59,11 @@ public class CartPage extends JFrame {
         JLabel titleLabel = new JLabel("Your Cart");
         titleLabel.setFont(new Font("Georgia", Font.BOLD, 34));
         titleLabel.setForeground(new Color(245, 230, 210));
-
         headerPanel.add(titleLabel, BorderLayout.NORTH);
-
 
         subtitleLabel = new JLabel();
         subtitleLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
         subtitleLabel.setForeground(new Color(230, 210, 180));
-
-      
         headerPanel.add(subtitleLabel, BorderLayout.SOUTH);
 
         listPanel = new JPanel();
@@ -90,10 +79,9 @@ public class CartPage extends JFrame {
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         bottom.setOpaque(false);
 
-        totalLabel = new JLabel("Total: 0.00 €");
+        totalLabel = new JLabel("Total: 0,00 €");
         totalLabel.setFont(new Font("Georgia", Font.BOLD, 22));
         totalLabel.setForeground(new Color(250, 230, 180));
-
         bottom.add(totalLabel);
 
         JPanel centerBlock = new JPanel(new BorderLayout());
@@ -104,25 +92,23 @@ public class CartPage extends JFrame {
         root.add(centerBlock, BorderLayout.CENTER);
         root.add(bottom, BorderLayout.SOUTH);
 
-        refreshList();  // ✔️ fixed call
+        refreshList();
     }
 
-
-         private void refreshList() {
-
+    private void refreshList() {
         listPanel.removeAll();
 
         List<CartItem> items = cartService.getItems();
+        int totalQuantity = 0;
+        for (CartItem it : items) totalQuantity += it.getQuantity();
 
-        // Update subtitle
-        subtitleLabel.setText(items.size() + " items in your collection");
+        subtitleLabel.setText(totalQuantity + " items in your collection");
+
 
         if (items.isEmpty()) {
-
             JPanel emptyPanel = new JPanel();
             emptyPanel.setOpaque(false);
             emptyPanel.setLayout(new BoxLayout(emptyPanel, BoxLayout.Y_AXIS));
-            emptyPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
             emptyPanel.setBorder(BorderFactory.createEmptyBorder(40, 0, 40, 0));
 
             JLabel emptyMsg = new JLabel("Your cart is empty");
@@ -140,25 +126,24 @@ public class CartPage extends JFrame {
             emptyPanel.add(exploreMsg);
 
             listPanel.add(emptyPanel);
-        }
-
-         else {
+        } else {
             for (CartItem item : items) {
                 listPanel.add(new BookItemPanel(item));
                 listPanel.add(Box.createVerticalStrut(18));
             }
         }
 
-        totalLabel.setText(String.format("Total: %.2f €", cartService.getTotal()));
+        // update total
+        double total = cartService.getTotal() / 100.0;
+        totalLabel.setText(String.format("Total: %.2f €", total).replace('.', ','));
 
         listPanel.revalidate();
         listPanel.repaint();
     }
 
-
-    //
-    // ---------------- BOOK ITEM PANEL ----------------
-    //
+    // -----------------------------------------------------
+    // BOOK ITEM PANEL
+    // -----------------------------------------------------
     private class BookItemPanel extends JPanel {
 
         private CartItem cartItem;
@@ -171,17 +156,13 @@ public class CartPage extends JFrame {
             setLayout(new BorderLayout(15, 0));
             setBorder(new LineBorder(new Color(200, 181, 122), 2, true));
             setPreferredSize(new Dimension(850, 170));
-            setMaximumSize(new Dimension(900, 170));
-            setMinimumSize(new Dimension(850, 170));
-            setBackground(new Color(0, 0, 0, 40));
 
             // COVER IMAGE
-            ImageIcon coverIcon = loadScaledIcon("/assets/images/book" + item.getBook().getId() + ".jpg", 120, 160);
+            ImageIcon coverIcon = ImageLoader.loadIcon(item.getBook().getImagePath(), 120, 160);
             JLabel cover = new JLabel(coverIcon);
-
             add(cover, BorderLayout.WEST);
 
-            // CENTER TEXT
+            // CENTER PANEL
             JPanel center = new JPanel();
             center.setOpaque(false);
             center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
@@ -194,7 +175,7 @@ public class CartPage extends JFrame {
             JLabel author = new JLabel(item.getBook().getAuthor());
             author.setForeground(new Color(240, 230, 210));
 
-            JLabel price = new JLabel(String.format("%.2f €", item.getBook().getPrice()));
+            JLabel price = new JLabel(String.format("%.2f €", item.getBook().getPrice() / 100.0).replace('.', ','));
             price.setForeground(new Color(240, 225, 190));
             price.setFont(new Font("Georgia", Font.PLAIN, 16));
 
@@ -205,18 +186,16 @@ public class CartPage extends JFrame {
 
             add(center, BorderLayout.CENTER);
 
-            // RIGHT SIDE
+            // RIGHT SIDE (QTY)
             JPanel right = new JPanel();
             right.setOpaque(false);
             right.setLayout(new BoxLayout(right, BoxLayout.Y_AXIS));
             right.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-            // FIXED ICON PATHS
-            JButton minus = new JButton(loadScaledIcon("/assets/icons/minus.png", 22, 22));
-            JButton plus = new JButton(loadScaledIcon("/assets/icons/plus.png", 22, 22));
-            JButton remove = new JButton(loadScaledIcon("/assets/icons/trash..png", 26, 26));
+            JButton minus  = new JButton(ImageLoader.loadScaledIcon("icons/minus.png", 22, 22));
+            JButton plus   = new JButton(ImageLoader.loadScaledIcon("icons/plus.png", 22, 22));
+            JButton remove = new JButton(ImageLoader.loadScaledIcon("icons/trash.png", 26, 26));
 
-            // button visuals
             for (JButton b : new JButton[]{minus, plus, remove}) {
                 b.setContentAreaFilled(false);
                 b.setBorder(null);
@@ -239,55 +218,24 @@ public class CartPage extends JFrame {
 
             add(right, BorderLayout.EAST);
 
-            // Actions
+            // ---- FIXED LISTENERS (ONLY ONE EACH!) ----
             minus.addActionListener(e -> {
-                cartService.decreaseQuantity(cartService.getItems().indexOf(cartItem));
+                int idx = cartService.getItems().indexOf(cartItem);
+                cartService.decreaseQuantity(idx);
                 refreshList();
             });
-
 
             plus.addActionListener(e -> {
-                cartService.increaseQuantity(cartService.getItems().indexOf(cartItem));
+                int idx = cartService.getItems().indexOf(cartItem);
+                cartService.increaseQuantity(idx);
                 refreshList();
             });
 
             remove.addActionListener(e -> {
-                cartService.removeAt(cartService.getItems().indexOf(cartItem));
-                refreshList();
-            });
-
-            remove.addActionListener(e -> {
-                cartService.removeAt(cartService.getItems().indexOf(cartItem));
+                int idx = cartService.getItems().indexOf(cartItem);
+                cartService.removeAt(idx);
                 refreshList();
             });
         }
-    }
-
-    // ---------------- IMAGE HELPERS -------------------
-
-    private Image loadImage(String path) {
-        try { return new ImageIcon(getClass().getResource(path)).getImage(); }
-        catch (Exception e) { System.err.println("Missing bg: " + path); return null; }
-    }
-
-    private ImageIcon loadScaledIcon(String path, int w, int h) {
-        try {
-            Image img = new ImageIcon(getClass().getResource(path)).getImage()
-                    .getScaledInstance(w, h, Image.SCALE_SMOOTH);
-            return new ImageIcon(img);
-        } catch (Exception e) {
-            System.err.println("Missing icon: " + path);
-            return null;
-        }
-    }
-
-    // TEST MAIN
-    public static void main(String[] args) {
-        CartService cartService = new CartService();
-        cartService.addBook(new Book("01", "Le langage de la nuit", "Ursula K. Le Guin", 14.80, ""));
-        cartService.addBook(new Book("2", "Un passé englouti", "Ava Reid", 27.99, ""));
-        cartService.addBook(new Book("3", "Outlander, Tome 2 : Le Talisman", "Diana Gabaldon", 18.90, ""));
-
-        SwingUtilities.invokeLater(() -> new CartPage(cartService).setVisible(true));
     }
 }

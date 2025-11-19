@@ -4,18 +4,19 @@ import java.util.*;
 import com.bookstoreswing.model.Book;
 
 /**
- * Simple in-memory data provider for books
+ * In-memory provider: image paths refer to resources/assets/...
+ * Prices expressed in cents.
  */
 public class BookData {
 
     public static List<Book> getSampleBooks() {
         List<Book> list = new ArrayList<>();
-        list.add(new Book("B001","Java: From Zero to Hero","Ali Ahmed",3500,"books/Fantasy1.jpg", "Programming"));
-        list.add(new Book("B002","Clean Code","Robert C. Martin",4200,"books/Fantasy2.jpg", "Programming"));
-        list.add(new Book("B003","Effective Java","Joshua Bloch",3900,"books/Fantasy3.jpg", "Programming"));
-        list.add(new Book("B004","Algorithms in Java","Thomas H. Cormen",4500,"books/Fantasy4.jpg", "Programming"));
-        list.add(new Book("B005","Design Patterns","Erich Gamma",4100,"books/Fantasy5.jpg", "Programming"));
-        list.add(new Book("B006","The Pragmatic Programmer","Andrew Hunt",3700,"books/Fantasy1.jpg", "Programming"));
+
+        list.add(new Book("B003","Effective Java","Joshua Bloch",3900,"covers/book3.jpg", "Programming"));
+        list.add(new Book("B004","Algorithms in Java","Thomas H. Cormen",4500,"covers/book4.jpg", "Programming"));
+        list.add(new Book("B005","Design Patterns","Erich Gamma",4100,"covers/book5.jpg", "Programming"));
+        list.add(new Book("B006","The Pragmatic Programmer","Andrew Hunt",3700,"covers/book7.jpg", "Programming"));
+
         return list;
     }
 
@@ -31,7 +32,7 @@ public class BookData {
         ));
 
         list.add(new Book("F002",
-                "La Légende Final Fantasy VII", 
+                "La Légende Final Fantasy VII",
                 "Nicolas Courcéer",
                 1480,
                 "books/Fantasy2.jpg",
@@ -40,7 +41,7 @@ public class BookData {
 
         list.add(new Book("F003",
                 "Le langage de la nuit - Essais sur la science-fiction et la fantasy",
-                "Ursula K. Le Guin", 
+                "Ursula K. Le Guin",
                 1480,
                 "books/Fantasy3.jpg",
                 "Fantasy"
@@ -56,16 +57,14 @@ public class BookData {
 
         list.add(new Book("F005",
                 "L'Impératrice remariée, Tome 1",
-                "Alphatart",  // CORRECTION ICI
+                "Alphatart",
                 1420,
                 "books/Fantasy5.jpg",
                 "Fantasy"
-       
         ));
 
         return list;
     }
-      
 
     public static List<Book> getGuerreBooks() {
         List<Book> list = new ArrayList<>();
@@ -105,7 +104,6 @@ public class BookData {
         return list;
     }
 
-    // AJOUTE cette méthode pour avoir tous les livres ensemble
     public static List<Book> getAllBooksWithCategories() {
         List<Book> allBooks = new ArrayList<>();
         allBooks.addAll(getSampleBooks());

@@ -2,13 +2,11 @@ package com.bookstoreswing.ui.windows;
 
 import javax.swing.*;
 import java.awt.*;
-import java.net.URL;
-import java.io.File;
-import javax.imageio.ImageIO;
 
 import com.bookstoreswing.ui.components.HeaderPanel;
 import com.bookstoreswing.ui.panels.BooksPanel;
-import com.bookstoreswing.service.CartService;
+import com.bookstoreswing.app.MainApp;
+import com.bookstoreswing.utils.ImageLoader;
 
 public class BookWindow extends JFrame {
 
@@ -28,12 +26,9 @@ public class BookWindow extends JFrame {
 
                 if (bgFinal != null) {
                     g.drawImage(bgFinal, 0, 0, getWidth(), getHeight(), this);
-
-                    // SAME DARK OVERLAY AS HOMEWINDOW
                     g.setColor(new Color(20, 10, 10, 180));
                     g.fillRect(0, 0, getWidth(), getHeight());
                 } else {
-                    // fallback (brown)
                     g.setColor(new Color(45, 35, 35));
                     g.fillRect(0, 0, getWidth(), getHeight());
                 }
@@ -53,57 +48,32 @@ public class BookWindow extends JFrame {
             new HomeWindow().setVisible(true);
         });
 
-        header.addBooksListener(e -> {}); // Already here
+        header.addBooksListener(e -> {});
 
-        header.addFavoriteListener(e ->
-                JOptionPane.showMessageDialog(this, "Favorites coming soon.")
-        );
+        header.addFavoriteListener(e -> {
+            new FavoriteWindow(MainApp.FAVORITES).setVisible(true);
+            dispose();
+        });
 
-        header.addCartListener(e ->
-                JOptionPane.showMessageDialog(this, "Cart coming soon.")
-        );
+        header.addCartListener(e -> {
+            new CartPage(MainApp.CART).setVisible(true);
+            dispose();
+        });
 
         // BOOK LIST PANEL
-        CartService cartService = new CartService();
-        BooksPanel booksPanel = new BooksPanel(cartService);
-
+        BooksPanel booksPanel = new BooksPanel(MainApp.CART);
         backgroundPanel.add(booksPanel, BorderLayout.CENTER);
     }
 
-    // ✅ SAME LOADER AS HOMEWINDOW
     private Image loadBackgroundImage() {
-
-        String[] resourceCandidates = {
-                "/assets/bg.jpg",
-                "/assets/bg.jpeg",
-                "/assets/bg.png",
-                "/assets/bg.jpg.jpg"
+        String[] paths = {
+            "background/bg.jpg",
+            "background/library.jpg"
         };
 
-        for (String r : resourceCandidates) {
-            try {
-                URL u = getClass().getResource(r);
-                if (u != null) {
-                    return ImageIO.read(u);
-                }
-            } catch (Exception ignored) {}
-        }
-
-        // Try direct file path
-        String[] fileCandidates = {
-                "src/assets/bg.jpg",
-                "src/assets/bg.jpeg",
-                "src/assets/bg.png",
-                "src/assets/bg.jpg.jpg"
-        };
-
-        for (String f : fileCandidates) {
-            try {
-                File file = new File(f);
-                if (file.exists()) {
-                    return ImageIO.read(file);
-                }
-            } catch (Exception ignored) {}
+        for (String p : paths) {
+            Image img = ImageLoader.loadImage(p);
+            if (img != null) return img;
         }
 
         System.err.println("Background image NOT FOUND.");
